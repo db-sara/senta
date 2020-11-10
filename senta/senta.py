@@ -6,19 +6,41 @@ import os
 
 
 def main():
+    # Load .env file into environment
     load_dotenv()
 
+    # Read in environment variables to configure setup
+    bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS')
+    sasl_mechanism = os.getenv('KAFKA_SASL_MECHANISM')
+    security_protocol = os.getenv('KAFKA_SECURITY_PROTOCOL')
+    sasl_plain_username = os.getenv('KAFKA_API_KEY')
+    sasl_plain_password = os.getenv('KAFKA_API_SECRET')
+    consumer_group_id = os.getenv('KAFKA_CONSUMER_GROUP_ID')
+    consumer_topic = os.getenv('KAFKA_CONSUMER_TOPIC')
+    producer_group_id = os.getenv('KAFKA_PRODUCER_GROUP_ID')
+    producer_topic = os.getenv('KAFKA_PRODUCER_TOPIC')
+    auto_offset_reset = 'earliest'
+
+    # Create a Kafka consumer, a client to read in requests from the cluster
     consumer = KafkaConsumer(
-        bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS'),
-        sasl_mechanism=os.getenv('KAFKA_SASL_MECHANISM'),
-        security_protocol=os.getenv('KAFKA_SECURITY_PROTOCOL'),
-        sasl_plain_username=os.getenv('KAFKA_API_KEY'),
-        sasl_plain_password=os.getenv('KAFKA_API_SECRET'),
-        # group_id=os.getenv('KAFKA_BOOTSTRAP_SERVER'),
-        auto_offset_reset='earliest',
+        consumer_topic,
+        bootstrap_servers=bootstrap_servers,
+        sasl_mechanism=sasl_mechanism,
+        security_protocol=security_protocol,
+        sasl_plain_username=sasl_plain_username,
+        sasl_plain_password=sasl_plain_password,
+        group_id=consumer_group_id,
+        auto_offset_reset=auto_offset_reset,
     )
-    # Subscribe to topic
-    consumer.subscribe(['nlp-requests'])
+
+    # Create a Kafka producer, a client to send in responses to the cluster
+    producer = KafkaProducer(
+        bootstrap_servers=bootstrap_servers,
+        sasl_mechanism=sasl_mechanism,
+        security_protocol=security_protocol,
+        sasl_plain_username=sasl_plain_username,
+        sasl_plain_password=sasl_plain_password,
+    )
 
     # Process messages
     for message in consumer:
@@ -27,9 +49,8 @@ def main():
         print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
                                              message.offset, message.key,
                                              message.value))
+        producer.send(producer_topic, message.value)
 
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     main()
