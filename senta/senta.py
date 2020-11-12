@@ -1,24 +1,38 @@
 #!/usr/bin/env python
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import json
 from kafka import KafkaConsumer, KafkaProducer
 from dotenv import load_dotenv
 import os
-
+nltk.download('vader_lexicon')
 
 def main():
     # Load .env file into environment
     load_dotenv()
+    sid = SentimentIntensityAnalyzer()
 
     # Read in environment variables to configure setup
-    bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS')
-    sasl_mechanism = os.getenv('KAFKA_SASL_MECHANISM')
-    security_protocol = os.getenv('KAFKA_SECURITY_PROTOCOL')
-    sasl_plain_username = os.getenv('KAFKA_API_KEY')
-    sasl_plain_password = os.getenv('KAFKA_API_SECRET')
-    consumer_group_id = os.getenv('KAFKA_CONSUMER_GROUP_ID')
-    consumer_topic = os.getenv('KAFKA_CONSUMER_TOPIC')
-    producer_group_id = os.getenv('KAFKA_PRODUCER_GROUP_ID')
-    producer_topic = os.getenv('KAFKA_PRODUCER_TOPIC')
+    #bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS')
+    #sasl_mechanism = os.getenv('KAFKA_SASL_MECHANISM')
+    #security_protocol = os.getenv('KAFKA_SECURITY_PROTOCOL')
+    #sasl_plain_username = os.getenv('KAFKA_API_KEY')
+    #sasl_plain_password = os.getenv('KAFKA_API_SECRET')
+    #consumer_group_id = os.getenv('KAFKA_CONSUMER_GROUP_ID')
+    #consumer_topic = os.getenv('KAFKA_CONSUMER_TOPIC')
+    #producer_group_id = os.getenv('KAFKA_PRODUCER_GROUP_ID')
+    #producer_topic = os.getenv('KAFKA_PRODUCER_TOPIC')
+    #auto_offset_reset = 'earliest'
+
+    bootstrap_servers = "pkc-4yyd6.us-east1.gcp.confluent.cloud:9092"
+    sasl_mechanism = "PLAIN"
+    security_protocol = "SASL_SSL"
+    sasl_plain_username = "4JAD3VA4FLHRNPDJ"
+    sasl_plain_password = "JCJ+lxLZmnYQHub07iOUsdvwtksaGny6sIbrSefd/ostkoTqVcj6332a9ZT6EEdh"
+    consumer_group_id = "nlp_request_consumer"
+    consumer_topic = "nlp-requests"
+    producer_group_id = "nlp_response_produnlp-requestscer"
+    producer_topic = "nlp-responses"
     auto_offset_reset = 'earliest'
 
     # Create a Kafka consumer, a client to read in requests from the cluster
@@ -46,11 +60,12 @@ def main():
     for message in consumer:
         # message value and key are raw bytes -- decode if necessary!
         # e.g., for unicode: `message.value.decode('utf-8')`
-        print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
-                                             message.offset, message.key,
-                                             message.value))
-        producer.send(producer_topic, message.value)
-
+        #print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
+        #                                     message.offset, message.key,
+        #                                     message.value))
+        polarity_scores = sid.polarity_scores(json.loads(message.value.decode('utf-8'))["value0"])
+        print(polarity_scores)
+        producer.send(producer_topic, json.dumps(polarity_scores, ensure_ascii=False).encode('utf8'))
 
 if __name__ == '__main__':
     main()
