@@ -13,26 +13,15 @@ def main():
     sid = SentimentIntensityAnalyzer()
 
     # Read in environment variables to configure setup
-    #bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS')
-    #sasl_mechanism = os.getenv('KAFKA_SASL_MECHANISM')
-    #security_protocol = os.getenv('KAFKA_SECURITY_PROTOCOL')
-    #sasl_plain_username = os.getenv('KAFKA_API_KEY')
-    #sasl_plain_password = os.getenv('KAFKA_API_SECRET')
-    #consumer_group_id = os.getenv('KAFKA_CONSUMER_GROUP_ID')
-    #consumer_topic = os.getenv('KAFKA_CONSUMER_TOPIC')
-    #producer_group_id = os.getenv('KAFKA_PRODUCER_GROUP_ID')
-    #producer_topic = os.getenv('KAFKA_PRODUCER_TOPIC')
-    #auto_offset_reset = 'earliest'
-
-    bootstrap_servers = "pkc-4yyd6.us-east1.gcp.confluent.cloud:9092"
-    sasl_mechanism = "PLAIN"
-    security_protocol = "SASL_SSL"
-    sasl_plain_username = "4JAD3VA4FLHRNPDJ"
-    sasl_plain_password = "JCJ+lxLZmnYQHub07iOUsdvwtksaGny6sIbrSefd/ostkoTqVcj6332a9ZT6EEdh"
-    consumer_group_id = "nlp_request_consumer"
-    consumer_topic = "nlp-requests"
-    producer_group_id = "nlp_response_produnlp-requestscer"
-    producer_topic = "nlp-responses"
+    bootstrap_servers = os.getenv('KAFKA_BOOTSTRAP_SERVERS')
+    sasl_mechanism = os.getenv('KAFKA_SASL_MECHANISM')
+    security_protocol = os.getenv('KAFKA_SECURITY_PROTOCOL')
+    sasl_plain_username = os.getenv('KAFKA_API_KEY')
+    sasl_plain_password = os.getenv('KAFKA_API_SECRET')
+    consumer_group_id = os.getenv('KAFKA_CONSUMER_GROUP_ID')
+    consumer_topic = os.getenv('KAFKA_CONSUMER_TOPIC')
+    producer_group_id = os.getenv('KAFKA_PRODUCER_GROUP_ID')
+    producer_topic = os.getenv('KAFKA_PRODUCER_TOPIC')
     auto_offset_reset = 'earliest'
 
     # Create a Kafka consumer, a client to read in requests from the cluster
