@@ -96,18 +96,11 @@ def main():
 
     # Process messages
     for message in consumer:
-        # message value and key are raw bytes -- decode if necessary!
-        # e.g., for unicode: `message.value.decode('utf-8')`
-        #print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
-        #                                     message.offset, message.key,
-        #                                     message.value))
-        
         content_type = json.loads(message.value.decode('utf-8'))["value0"]
         body = json.loads(message.value.decode('utf-8'))["value1"]
         polarity_scores = sid.polarity_scores(body)
         if content_type == "news":
             summary = summarize(body)
-            print(summary)
             summary_scores = sid.polarity_scores(summary)
             producer.send(producer_topic, json.dumps({'type': content_type, 'summary': summary,'overall_sentiment': polarity_scores['compound'], 'summary_sentiment': summary_scores['compound']}, ensure_ascii=False).encode('utf8'))
         else:
