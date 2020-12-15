@@ -96,14 +96,15 @@ def main():
 
     # Process messages
     for message in consumer:
-        content_type = json.loads(message.value.decode('utf-8'))["type"]
-        body = json.loads(message.value.decode('utf-8'))["body"]
+        request = json.loads(message.value.decode('utf-8'))
+        content_type = request["type"]
+        body = request["body"]
         polarity_scores = sid.polarity_scores(body)
         if content_type == "news":
             summary = summarize(body)
             summary_scores = sid.polarity_scores(summary)
-            producer.send(producer_topic, json.dumps({'type': content_type, 'overall_sentiment': polarity_scores['compound'], 'summary': summary, 'summary_sentiment': summary_scores['compound']}, ensure_ascii=False).encode('utf8'))
+            producer.send(producer_topic, key = message.key, value = json.dumps({'type': content_type, 'overall_sentiment': polarity_scores['compound'], 'summary': summary, 'summary_sentiment': summary_scores['compound']}, ensure_ascii=False).encode('utf8'))
         else:
-            producer.send(producer_topic, json.dumps({'type': content_type, 'overall_sentiment': polarity_scores['compound']}, ensure_ascii=False).encode('utf8'))        
+            producer.send(producer_topic, key = message.key, value = json.dumps({'type': content_type, 'overall_sentiment': polarity_scores['compound']}, ensure_ascii=False).encode('utf8'))        
 if __name__ == '__main__':
     main()
